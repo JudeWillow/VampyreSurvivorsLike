@@ -1,5 +1,6 @@
 extends CharacterBody2D
 
+@export var hp = 80
 var movementSpeed = 80.0
 @onready var sprite = $Sprite2D
 @onready var walkTimer = get_node("%WalkTimer")
@@ -26,3 +27,8 @@ func movement():
 	velocity = move.normalized() * movementSpeed ## Creates a velocity by using the base velocity set at the start and the direction pressed
 	##Using the .normalized function allows the player to not move much faster in a diagonal than other directions
 	move_and_slide()##Tells Godot the character wants to move
+
+
+func _on_hurtbox_hurt(damage: Variant) -> void:
+	hp -= damage
+	print(hp)
