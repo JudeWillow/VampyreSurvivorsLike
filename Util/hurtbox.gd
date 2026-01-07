@@ -22,6 +22,8 @@ func _on_area_entered(area: Area2D) -> void:
 						area.tempDisable() ## Call the tempDisable function, which disables the collision and starts the timer
 			var damage = area.damage ## Damage variable based on the damage of the area
 			emit_signal("hurt",damage) ## Emits the hurt signal which can interact with the player and enemy nodes to reduce their hp by the damage
+			if area.has_method("enemyHit"):
+				area.enemyHit(1)
 
 
 func _on_disable_timer_timeout() -> void: ## Once the timer finishes, this function runs

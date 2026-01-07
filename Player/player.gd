@@ -4,6 +4,17 @@ extends CharacterBody2D
 var movementSpeed = 80.0
 @onready var sprite = $Sprite2D
 @onready var walkTimer = get_node("%WalkTimer")
+var iceSpear = preload("res://Player/Attack/ice_spear.tscn")
+@onready var iceSpearTimer = get_node("%IceSpearTimer")
+@onready var iceSpearAttackTimer = get_node("%IceSpearAttackTimer")
+var iceSpearAmmo = 0
+var iceSpearBaseAmmo = 1
+var iceSpearAttackSpeed = 1.5
+var iceSpearLevel = 1
+var enemyClose = []
+
+func _ready():
+	attack()
 
 func _physics_process(_delta): ## Runs every physics game tick (1/60 of a second)
 	movement()
@@ -28,7 +39,47 @@ func movement():
 	##Using the .normalized function allows the player to not move much faster in a diagonal than other directions
 	move_and_slide()##Tells Godot the character wants to move
 
+func attack():
+	if iceSpearLevel > 0:
+		iceSpearTimer.wait_time = iceSpearAttackSpeed
+		if iceSpearTimer.is_stopped():
+			iceSpearTimer.start()
 
 func _on_hurtbox_hurt(damage: Variant) -> void:
 	hp -= damage
 	print(hp)
+
+
+func _on_ice_spear_timer_timeout() -> void:
+	iceSpearAmmo += iceSpearBaseAmmo
+	iceSpearAttackTimer.start()
+
+
+func _on_ice_spear_attack_timer_timeout() -> void:
+	if iceSpearAmmo > 0:
+		var iceSpearAttack = iceSpear.instantiate()
+		iceSpearAttack.position = position
+		iceSpearAttack.target = getRandomTarget()
+		iceSpearAttack.level = iceSpearLevel
+		add_child(iceSpearAttack)
+		iceSpearAmmo -= 1
+		if iceSpearAmmo > 0:
+			iceSpearAttackTimer.start()
+		else:
+			iceSpearAttackTimer.stop()
+		
+func getRandomTarget():
+	if enemyClose.size() > 0:
+		return enemyClose.pick_random().global_position
+	else:
+		return Vector2.UP
+
+
+func _on_enemy_detection_area_body_entered(body: Node2D) -> void:
+	if not enemyClose.has(body):
+		enemyClose.append(body)
+
+
+func _on_enemy_detection_area_body_exited(body: Node2D) -> void:
+	if enemyClose.has(body):
+		enemyClose.erase(body)
