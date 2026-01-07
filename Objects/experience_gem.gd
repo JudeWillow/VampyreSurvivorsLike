@@ -8,6 +8,7 @@ var target = null
 var speed = 0
 @onready var sprite = $Sprite2D
 @onready var collision = $CollisionShape2D
+@onready var sound = $soundCollected
 
 func _ready():
 	if experience < 5:
@@ -19,9 +20,14 @@ func _ready():
 
 func _physics_process(delta: float) -> void:
 	if target != null:
-		global_position = global_position.move_toward(target.global_position, speed)
-		speed += 2 * delta
+		global_position = global_position.move_toward(target.global_position, speed) ## Move towards the player if there is a target
+		speed += 2 * delta ## Changes the speed variable
 
 func collect():
-	queue_free()
-	return experience
+	sound.play() ## Plays the sound
+	collision.call_deferred("set", "disabled", true) ## Disables the collision of the object
+	sprite.visible = false ## Hides the sprite
+	return experience ## Returns the amount of xp the gem was worth
+
+func _on_sound_collected_finished() -> void:
+	queue_free() ## Clears the sprite from the screen once the sound has finished
