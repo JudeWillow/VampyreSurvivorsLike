@@ -12,6 +12,9 @@ var iceSpearBaseAmmo = 1
 var iceSpearAttackSpeed = 1.5
 var iceSpearLevel = 1
 var enemyClose = []
+var experience = 0
+var experienceLevel = 1
+var collectedExperience = 0
 
 func _ready():
 	attack()
@@ -83,3 +86,13 @@ func _on_enemy_detection_area_body_entered(body: Node2D) -> void:
 func _on_enemy_detection_area_body_exited(body: Node2D) -> void:
 	if enemyClose.has(body):
 		enemyClose.erase(body)
+
+
+func _on_grab_area_area_entered(area: Area2D) -> void:
+	if area.is_in_group("Loot"): ## Checks if its in the loot group
+		area.target = self ## Will target the player if it is
+
+func _on_collect_area_area_entered(area: Area2D) -> void:
+	if area.is_in_group("Loot"): ## Check if its in the loot group
+		var gemExp = area.collect() ## Returns the value from the xp gem using collect function
+		
