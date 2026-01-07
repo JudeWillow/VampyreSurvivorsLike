@@ -15,9 +15,12 @@ var enemyClose = []
 var experience = 0
 var experienceLevel = 1
 var collectedExperience = 0
+@onready var EXPBar = get_node("%EXPBar")
+@onready var labelLevel = get_node("%LabelLevel")
 
 func _ready():
 	attack()
+	setEXPBar(experience, calculateExperienceCap())
 
 func _physics_process(_delta): ## Runs every physics game tick (1/60 of a second)
 	movement()
@@ -95,4 +98,35 @@ func _on_grab_area_area_entered(area: Area2D) -> void:
 func _on_collect_area_area_entered(area: Area2D) -> void:
 	if area.is_in_group("Loot"): ## Check if its in the loot group
 		var gemExp = area.collect() ## Returns the value from the xp gem using collect function
-		
+		calculateExperience(gemExp)
+
+func calculateExperience(gemExp):
+	var expReq = calculateExperienceCap()
+	collectedExperience += gemExp
+	if experience + collectedExperience >= expReq:
+		collectedExperience -= expReq - experience
+		experienceLevel += 1
+		labelLevel.text = str("Level: ", experienceLevel)
+		print("Level:", experienceLevel)
+		experience = 0
+		expReq = calculateExperienceCap()
+		calculateExperience(0) ## When you level, it will run with however much is in collectedExperience again
+	else:
+		experience += collectedExperience
+		collectedExperience = 0
+	
+	setEXPBar(experience, expReq)
+
+func calculateExperienceCap():
+	var expCap = experienceLevel
+	if experienceLevel < 20:
+		expCap = experienceLevel * 5
+	elif experienceLevel < 40:
+		expCap + 95 * (experienceLevel-19) * 8
+	else:
+		expCap = 255 + (experienceLevel - 39) * 12
+	return expCap
+ 
+func setEXPBar(setValue = 1, setMaxValue = 100):
+	EXPBar.value = setValue
+	EXPBar.max_value = setMaxValue
